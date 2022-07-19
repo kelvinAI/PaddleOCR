@@ -12,9 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from setuptools import setup
+from setuptools import setup, find_packages
 from io import open
-from paddleocr import VERSION
 
 with open('requirements.txt', encoding="utf-8-sig") as f:
     requirements = f.readlines()
@@ -29,11 +28,11 @@ def readme():
 
 setup(
     name='paddleocr',
-    packages=['paddleocr'],
-    package_dir={'paddleocr': ''},
+    packages=find_packages(where='src'),
+    package_dir={'': 'src'},
     include_package_data=True,
-    entry_points={"console_scripts": ["paddleocr= paddleocr.paddleocr:main"]},
-    version=VERSION,
+    entry_points={"console_scripts": ["paddleocr=paddleocr.paddleocr:main"]},
+    version= '2.5.0.3',
     install_requires=requirements,
     license='Apache License 2.0',
     description='Awesome OCR toolkits based on PaddlePaddle （8.6M ultra-lightweight pre-trained model, support training and deployment among server, mobile, embeded and IoT devices',
