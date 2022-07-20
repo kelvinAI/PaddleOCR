@@ -1,3 +1,22 @@
+## Note
+This is an experimental modified version that aims to fix issues with import namespace clashing, such as "No module named tools.infer" and other
+import issues caused by other libraries present in the environment
+- All python code are moved under src/paddleocr folder for better management
+- All sys.insert or any imports depending on __dir__ are removed to prevent issues with namespace clashing and favouring absolute imports such as
+```python
+from paddleocr.tools.infer import xxx
+```
+- Relative imports such as from ..infer import xxx can be used as well
+## Install this version that fixes importing issues:
+```python
+# Install via tag
+pip install git+https://github.com/kelvinAI/PaddleOCR.git@v2.5.0.3devA
+
+# Install via branch
+pip install git+https://github.com/kelvinAI/PaddleOCR.git@remove_ppocrlabel
+```
+
+
 English | [简体中文](README_ch.md)
 
 <p align="center">
