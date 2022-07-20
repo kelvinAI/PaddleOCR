@@ -22,7 +22,7 @@ from paddle import ParamAttr
 import paddle.nn as nn
 import paddle.nn.functional as F
 
-from ppocr.modeling.necks.rnn import Im2Seq, EncoderWithRNN, EncoderWithFC, SequenceEncoder, EncoderWithSVTR
+from paddleocr.ppocr.modeling.necks.rnn import Im2Seq, EncoderWithRNN, EncoderWithFC, SequenceEncoder, EncoderWithSVTR
 from .rec_ctc_head import CTCHead
 from .rec_sar_head import SARHead
 

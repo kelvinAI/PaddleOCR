@@ -20,7 +20,7 @@ import paddle
 from paddle import nn
 from paddle.nn import functional as F
 import numpy as np
-from ppocr.utils.iou import iou
+from paddleocr.ppocr.utils.iou import iou
 
 
 class PSELoss(nn.Layer):

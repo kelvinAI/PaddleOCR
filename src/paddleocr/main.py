@@ -39,7 +39,10 @@ __all__ = [
 SUPPORT_DET_MODEL = ['DB']
 VERSION = '2.5.0.3'
 SUPPORT_REC_MODEL = ['CRNN', 'SVTR_LCNet']
+
+
 BASE_DIR = os.path.expanduser("~/.paddleocr/")
+
 
 DEFAULT_OCR_MODEL_VERSION = 'PP-OCRv3'
 SUPPORT_OCR_MODEL_VERSION = ['PP-OCR', 'PP-OCRv2', 'PP-OCRv3']
@@ -391,6 +394,9 @@ class PaddleOCR(predict_system.TextSystem):
         self.use_angle_cls = params.use_angle_cls
         lang, det_lang = parse_lang(params.lang)
 
+        # Check if PADDLEOCR_HOME environment variable is set
+        if os.environ.get("PADDLEOCR_HOME"):
+            BASE_DIR=os.environ.get("PADDLEOCR_HOME")
         # init model dir
         det_model_config = get_model_config('OCR', params.ocr_version, 'det',
                                             det_lang)

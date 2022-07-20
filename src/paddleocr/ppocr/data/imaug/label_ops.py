@@ -856,7 +856,7 @@ class VQATokenLabelEncode(object):
                  **kwargs):
         super(VQATokenLabelEncode, self).__init__()
         from paddlenlp.transformers import LayoutXLMTokenizer, LayoutLMTokenizer, LayoutLMv2Tokenizer
-        from ppocr.utils.utility import load_vqa_bio_label_maps
+        from paddleocr.ppocr.utils.utility import load_vqa_bio_label_maps
         tokenizer_dict = {
             'LayoutXLM': {
                 'class': LayoutXLMTokenizer,

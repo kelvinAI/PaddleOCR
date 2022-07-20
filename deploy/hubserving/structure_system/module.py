@@ -18,7 +18,6 @@ from __future__ import print_function
 
 import os
 import sys
-sys.path.insert(0, ".")
 import copy
 
 import time
@@ -29,7 +28,7 @@ import cv2
 import numpy as np
 import paddlehub as hub
 
-from tools.infer.utility import base64_to_cv2
+from paddleocr.tools.infer.utility import base64_to_cv2
 from ppstructure.predict_system import StructureSystem as PPStructureSystem
 from ppstructure.predict_system import save_structure_res
 from ppstructure.utility import parse_args

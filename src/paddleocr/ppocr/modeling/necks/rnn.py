@@ -19,8 +19,8 @@ from __future__ import print_function
 import paddle
 from paddle import nn
 
-from ppocr.modeling.heads.rec_ctc_head import get_para_bias_attr
-from ppocr.modeling.backbones.rec_svtrnet import Block, ConvBNLayer, trunc_normal_, zeros_, ones_
+from paddleocr.ppocr.modeling.heads.rec_ctc_head import get_para_bias_attr
+from paddleocr.ppocr.modeling.backbones.rec_svtrnet import Block, ConvBNLayer, trunc_normal_, zeros_, ones_
 
 
 class Im2Seq(nn.Layer):

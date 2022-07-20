@@ -24,7 +24,7 @@ import numpy as np
 from .self_attention import WrapEncoderForFeature
 from .self_attention import WrapEncoder
 from paddle.static import Program
-from ppocr.modeling.backbones.rec_resnet_fpn import ResNetFPN
+from paddleocr.ppocr.modeling.backbones.rec_resnet_fpn import ResNetFPN
 
 from collections import OrderedDict
 gradient_clip = 10

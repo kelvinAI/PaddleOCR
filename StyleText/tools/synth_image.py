@@ -16,9 +16,6 @@ import cv2
 import sys
 import glob
 
-__dir__ = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(__dir__)
-sys.path.append(os.path.abspath(os.path.join(__dir__, '..')))
 
 from utils.config import ArgsParser
 from engine.synthesisers import ImageSynthesiser

@@ -18,7 +18,6 @@ from __future__ import print_function
 
 import os
 import sys
-sys.path.insert(0, ".")
 import copy
 import paddlehub
 from paddlehub.common.logger import logger
@@ -26,9 +25,9 @@ from paddlehub.module.module import moduleinfo, runnable, serving
 import cv2
 import paddlehub as hub
 
-from tools.infer.utility import base64_to_cv2
-from tools.infer.predict_cls import TextClassifier
-from tools.infer.utility import parse_args
+from paddleocr.tools.infer.utility import base64_to_cv2
+from paddleocr.tools.infer.predict_cls import TextClassifier
+from paddleocr.tools.infer.utility import parse_args
 from deploy.hubserving.ocr_cls.params import read_params
 
 

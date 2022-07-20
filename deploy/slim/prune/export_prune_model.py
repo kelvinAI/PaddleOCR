@@ -19,19 +19,14 @@ from __future__ import print_function
 import os
 import sys
 
-__dir__ = os.path.dirname(__file__)
-sys.path.append(__dir__)
-sys.path.append(os.path.join(__dir__, '..', '..', '..'))
-sys.path.append(os.path.join(__dir__, '..', '..', '..', 'tools'))
-
 import paddle
-from ppocr.data import build_dataloader
-from ppocr.modeling.architectures import build_model
+from paddleocr.ppocr.data import build_dataloader
+from paddleocr.ppocr.modeling.architectures import build_model
 
-from ppocr.postprocess import build_post_process
-from ppocr.metrics import build_metric
-from ppocr.utils.save_load import load_model
-import tools.program as program
+from paddleocr.ppocr.postprocess import build_post_process
+from paddleocr.ppocr.metrics import build_metric
+from paddleocr.ppocr.utils.save_load import load_model
+from paddleocr.tools import program
 
 
 def main(config, device, logger, vdl_writer):

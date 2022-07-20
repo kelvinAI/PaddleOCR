@@ -23,11 +23,8 @@ from paddle import ParamAttr
 import os
 import sys
 
-__dir__ = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(__dir__)
-sys.path.insert(0, os.path.abspath(os.path.join(__dir__, '../../..')))
 
-from ppocr.modeling.backbones.det_mobilenet_v3 import SEModule
+from paddleocr.ppocr.modeling.backbones.det_mobilenet_v3 import SEModule
 
 
 class DSConv(nn.Layer):

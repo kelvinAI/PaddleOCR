@@ -24,7 +24,7 @@ from __future__ import print_function
 import paddle
 import paddle.nn as nn
 
-from ppocr.modeling.backbones.det_mobilenet_v3 import make_divisible
+from paddleocr.ppocr.modeling.backbones.det_mobilenet_v3 import make_divisible
 
 M0_cfgs = [
     # s, n, c, ks, c1, c2, g1, g2, c3, g3, g4, y1, y2, y3, r

@@ -28,7 +28,7 @@ from paddleocr.ppocr.metrics import build_metric
 from paddleocr.ppocr.utils.save_load import load_model
 from paddleocr.ppocr.utils.utility import set_seed
 from paddleocr.ppocr.modeling.architectures import apply_to_static
-import tools.program as program
+import paddleocr.tools.program as program
 
 dist.get_world_size()
 
