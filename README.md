@@ -2,7 +2,7 @@
 This is an experimental modified version that aims to fix issues with import namespace clashing, such as "No module named tools.infer" and other
 import issues caused by other libraries present in the environment
 - All python code are moved under src/paddleocr folder for better management
-- All sys.insert or any imports depending on __dir__ are removed to prevent issues with namespace clashing and favouring absolute imports such as
+- All sys.insert or any imports depending on `__dir__` are removed to prevent issues with namespace clashing and favouring absolute imports such as
 ```python
 from paddleocr.tools.infer import xxx
 ```
