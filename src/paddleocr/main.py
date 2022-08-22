@@ -20,7 +20,7 @@ import cv2
 import logging
 import numpy as np
 from pathlib import Path
-
+import json
 from paddleocr.ppocr.utils.logging import get_logger
 logger = get_logger()
 
@@ -48,11 +48,32 @@ if os.environ.get("PADDLEOCR_HOME"):
 
 
 DEFAULT_OCR_MODEL_VERSION = 'PP-OCRv3'
-SUPPORT_OCR_MODEL_VERSION = ['PP-OCR', 'PP-OCRv2', 'PP-OCRv3']
+SUPPORT_OCR_MODEL_VERSION = ['PP-OCR', 'PP-OCRv2', 'PP-OCRv3','PP-OCRv3-ktp']
 DEFAULT_STRUCTURE_MODEL_VERSION = 'PP-STRUCTURE'
 SUPPORT_STRUCTURE_MODEL_VERSION = ['PP-STRUCTURE']
 MODEL_URLS = {
     'OCR': {
+        'PP-OCRv3-ktp': {
+            'det': {
+                'en': {
+                    'url':
+                    'https://paddleocr.bj.bcebos.com/PP-OCRv3/english/en_PP-OCRv3_det_infer.tar',
+                }
+            },
+            'rec': {
+                'en': {
+                    'url':
+                    '/home/users/industry/aderaglobal/kelvink/scratch/projects/2022/ocr/pp_ocr/fine_tuning/local_5.3.0/infer_model/infer_ktp_5.3.0',
+                    'dict_path': './ppocr/utils/en_dict.txt'
+                }
+            },
+            'cls': {
+                'ch': {
+                    'url':
+                    'https://paddleocr.bj.bcebos.com/dygraph_v2.0/ch/ch_ppocr_mobile_v2.0_cls_infer.tar',
+                }
+            }
+        },
         'PP-OCRv3': {
             'det': {
                 'ch': {
@@ -283,7 +304,7 @@ def parse_args(mMain=True):
     parser.add_argument(
         "--ocr_version",
         type=str,
-        choices=SUPPORT_OCR_MODEL_VERSION,
+        # choices=SUPPORT_OCR_MODEL_VERSION,
         default='PP-OCRv3',
         help='OCR Model version, the current model support list is as follows: '
         '1. PP-OCRv3 Support Chinese and English detection and recognition model, and direction classifier model'
@@ -297,17 +318,39 @@ def parse_args(mMain=True):
         default='PP-STRUCTURE',
         help='Model version, the current model support list is as follows:'
         ' 1. STRUCTURE Support en table structure model.')
+    
+    parser.add_argument(
+        "--model_url",
+        type=json.loads,
+        default=None,
+        help='Custom model configuration path to load from'
+    )
+    
+    
+    parser.add_argument(
+        "--force_redownload",
+        dest="force_redownload",
+        action="store_true",
+        help='Force model redownloading'
+    )
 
     for action in parser._actions:
         if action.dest in ['rec_char_dict_path', 'table_char_dict_path']:
             action.default = None
+    return_parser = None
     if mMain:
-        return parser.parse_args()
+        return_parser = parser.parse_args()
     else:
         inference_args_dict = {}
         for action in parser._actions:
             inference_args_dict[action.dest] = action.default
-        return argparse.Namespace(**inference_args_dict)
+        return_parser = argparse.Namespace(**inference_args_dict)
+    if return_parser.model_url is not None:
+        # Update MODEL_URLS 
+        ()
+        MODEL_URLS.update(return_parser.model_url)
+        
+    return return_parser
 
 
 def parse_lang(lang):
@@ -348,37 +391,40 @@ def parse_lang(lang):
     return lang, det_lang
 
 
-def get_model_config(type, version, model_type, lang):
-    if type == 'OCR':
-        DEFAULT_MODEL_VERSION = DEFAULT_OCR_MODEL_VERSION
-    elif type == 'STRUCTURE':
-        DEFAULT_MODEL_VERSION = DEFAULT_STRUCTURE_MODEL_VERSION
-    else:
-        raise NotImplementedError
+def get_model_config(type, version, model_type, lang, all_models=MODEL_URLS):
+    
+    # if type == 'OCR':
+    #     DEFAULT_MODEL_VERSION = DEFAULT_OCR_MODEL_VERSION
+    # elif type == 'STRUCTURE':
+    #     DEFAULT_MODEL_VERSION = DEFAULT_STRUCTURE_MODEL_VERSION
+    # else:
+    #     raise NotImplementedError
 
-    model_urls = MODEL_URLS[type]
-    if version not in model_urls:
-        version = DEFAULT_MODEL_VERSION
-    if model_type not in model_urls[version]:
-        if model_type in model_urls[DEFAULT_MODEL_VERSION]:
-            version = DEFAULT_MODEL_VERSION
-        else:
-            logger.error('{} models is not support, we only support {}'.format(
-                model_type, model_urls[DEFAULT_MODEL_VERSION].keys()))
-            sys.exit(-1)
+    model_urls = all_models[type]
+    # if version not in model_urls:
+    #     # version = DEFAULT_MODEL_VERSION
+    #     pass
+    # if model_type not in model_urls[version]:
+    #     if model_type in model_urls[DEFAULT_MODEL_VERSION]:
+    #         # version = DEFAULT_MODEL_VERSION
+    #         pass
+    #     else:
+    #         # logger.error('{} models is not support, we only support {}'.format(
+    #         #     model_type, model_urls[DEFAULT_MODEL_VERSION].keys()))
+    #         # sys.exit(-1)
+    #         pass
 
-    if lang not in model_urls[version][model_type]:
-        if lang in model_urls[DEFAULT_MODEL_VERSION][model_type]:
-            version = DEFAULT_MODEL_VERSION
-        else:
-            logger.error(
-                'lang {} is not support, we only support {} for {} models'.
-                format(lang, model_urls[DEFAULT_MODEL_VERSION][model_type].keys(
-                ), model_type))
-            sys.exit(-1)
+    # if lang not in model_urls[version][model_type]:
+    #     if lang in model_urls[DEFAULT_MODEL_VERSION][model_type]:
+    #         version = DEFAULT_MODEL_VERSION
+    #     else:
+    #         logger.error(
+    #             'lang {} is not support, we only support {} for {} models'.
+    #             format(lang, model_urls[DEFAULT_MODEL_VERSION][model_type].keys(
+    #             ), model_type))
+    #         sys.exit(-1)
     return model_urls[version][model_type][lang]
 
-from pdb import set_trace
 class PaddleOCR(predict_system.TextSystem):
     def __init__(self, **kwargs):
         """
@@ -388,29 +434,30 @@ class PaddleOCR(predict_system.TextSystem):
         """
         params = parse_args(mMain=False)
         params.__dict__.update(**kwargs)
-        assert params.ocr_version in SUPPORT_OCR_MODEL_VERSION, "ocr_version must in {}, but get {}".format(
-            SUPPORT_OCR_MODEL_VERSION, params.ocr_version)
+        # assert params.ocr_version in SUPPORT_OCR_MODEL_VERSION, "ocr_version must in {}, but get {}".format(
+        #     SUPPORT_OCR_MODEL_VERSION, params.ocr_version)
         params.use_gpu = check_gpu(params.use_gpu)
-
+        ()
         if not params.show_log:
             logger.setLevel(logging.INFO)
         self.use_angle_cls = params.use_angle_cls
         lang, det_lang = parse_lang(params.lang)
 
+        model_urls_all = params.model_url if params.model_url else MODEL_URLS
         # init model dir
         det_model_config = get_model_config('OCR', params.ocr_version, 'det',
-                                            det_lang)
+                                            det_lang, all_models=model_urls_all)
         params.det_model_dir, det_url = confirm_model_dir_url(
             params.det_model_dir,
             os.path.join(BASE_DIR, 'whl', 'det', det_lang),
             det_model_config['url'])
         rec_model_config = get_model_config('OCR', params.ocr_version, 'rec',
-                                            lang)
+                                            lang, all_models=model_urls_all)
         params.rec_model_dir, rec_url = confirm_model_dir_url(
             params.rec_model_dir,
             os.path.join(BASE_DIR, 'whl', 'rec', lang), rec_model_config['url'])
         cls_model_config = get_model_config('OCR', params.ocr_version, 'cls',
-                                            'ch')
+                                            'ch', all_models=model_urls_all)
         params.cls_model_dir, cls_url = confirm_model_dir_url(
             params.cls_model_dir,
             os.path.join(BASE_DIR, 'whl', 'cls'), cls_model_config['url'])
@@ -418,10 +465,11 @@ class PaddleOCR(predict_system.TextSystem):
             params.rec_image_shape = "3, 48, 320"
         else:
             params.rec_image_shape = "3, 32, 320"
+            
         # download model
-        maybe_download(params.det_model_dir, det_url)
-        maybe_download(params.rec_model_dir, rec_url)
-        maybe_download(params.cls_model_dir, cls_url)
+        maybe_download(params.det_model_dir, det_url, params.force_redownload)
+        maybe_download(params.rec_model_dir, rec_url, params.force_redownload)
+        maybe_download(params.cls_model_dir, cls_url, params.force_redownload)
 
         if params.det_algorithm not in SUPPORT_DET_MODEL:
             logger.error('det_algorithm must in {}'.format(SUPPORT_DET_MODEL))
@@ -433,7 +481,6 @@ class PaddleOCR(predict_system.TextSystem):
         if params.rec_char_dict_path is None:
             params.rec_char_dict_path = str(
                 Path(__file__).parent / rec_model_config['dict_path'])
-
         logger.debug(params)
         # init det_model and rec_model
         super().__init__(params)
@@ -455,7 +502,6 @@ class PaddleOCR(predict_system.TextSystem):
             logger.warning(
                 'Since the angle classifier is not initialized, the angle classifier will not be uesd during the forward process'
             )
-
         if isinstance(img, str):
             # download net image
             if img.startswith('http'):

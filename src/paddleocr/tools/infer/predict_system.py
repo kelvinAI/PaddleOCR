@@ -32,7 +32,6 @@ from paddleocr.ppocr.utils.logging import get_logger
 logger = get_logger()
 
 
-from pdb import set_trace
 class TextSystem(object):
     def __init__(self, args):
         if not args.show_log:

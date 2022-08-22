@@ -104,7 +104,7 @@ def main():
     if not os.path.exists(os.path.dirname(save_res_path)):
         os.makedirs(os.path.dirname(save_res_path))
 
-    model.eval()
+    model.eval();
 
     with open(save_res_path, "w") as fout:
         for file in get_image_file_list(config['Global']['infer_img']):

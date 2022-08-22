@@ -17,6 +17,9 @@ import sys
 import tarfile
 import requests
 from tqdm import tqdm
+import shutil
+from pathlib import Path
+
 
 from paddleocr.ppocr.utils.logging import get_logger
 
@@ -38,47 +41,58 @@ def download_with_progressbar(url, save_path):
         logger.error("Something went wrong while downloading models")
         sys.exit(0)
 
-
-def maybe_download(model_storage_directory, url):
+def maybe_download(model_storage_directory, url, force_redownload=False):
     # using custom model
     tar_file_name_list = [
         'inference.pdiparams', 'inference.pdiparams.info', 'inference.pdmodel'
     ]
-    if not os.path.exists(
+    if force_redownload or not os.path.exists(
             os.path.join(model_storage_directory, 'inference.pdiparams')
     ) or not os.path.exists(
             os.path.join(model_storage_directory, 'inference.pdmodel')):
-        assert url.endswith('.tar'), 'Only supports tar compressed package'
-        tmp_path = os.path.join(model_storage_directory, url.split('/')[-1])
-        print('download {} to {}'.format(url, tmp_path))
+        # assert url.endswith('.tar'), 'Only supports tar compressed package'
         os.makedirs(model_storage_directory, exist_ok=True)
-        download_with_progressbar(url, tmp_path)
-        with tarfile.open(tmp_path, 'r') as tarObj:
-            for member in tarObj.getmembers():
-                filename = None
-                for tar_file_name in tar_file_name_list:
-                    if tar_file_name in member.name:
-                        filename = tar_file_name
-                if filename is None:
+        if url.endswith('.tar'):
+            tmp_path = os.path.join(model_storage_directory, url.split('/')[-1])
+            print('download {} to {}'.format(url, tmp_path))
+            download_with_progressbar(url, tmp_path)
+            with tarfile.open(tmp_path, 'r') as tarObj:
+                for member in tarObj.getmembers():
+                    filename = None
+                    for tar_file_name in tar_file_name_list:
+                        if tar_file_name in member.name:
+                            filename = tar_file_name
+                    if filename is None:
+                        continue
+                    file = tarObj.extractfile(member)
+                    with open(
+                            os.path.join(model_storage_directory, filename),
+                            'wb') as f:
+                        f.write(file.read())
+            os.remove(tmp_path)
+        else:
+            # Assume that url is a path on server
+            # Copy 'inference.pdiparams' and 'inference.pdmodel' to model_storage_directory
+            for tar_file_name in tar_file_name_list:
+                file = os.path.join(url,tar_file_name)
+                if not os.path.isfile(file):
+                    print("{} does not exist".format(tar_file_name))
                     continue
-                file = tarObj.extractfile(member)
-                with open(
-                        os.path.join(model_storage_directory, filename),
-                        'wb') as f:
-                    f.write(file.read())
-        os.remove(tmp_path)
+                print("copying {} to {}".format(file,model_storage_directory))
+                shutil.copy(file, model_storage_directory)
 
 
 def is_link(s):
     return s is not None and s.startswith('http')
-
 
 def confirm_model_dir_url(model_dir, default_model_dir, default_url):
     url = default_url
     if model_dir is None or is_link(model_dir):
         if is_link(model_dir):
             url = model_dir
-        file_name = url.split('/')[-1][:-4]
+        # file_name = url.split('/')[-1][:-4]
+        
+        file_name = Path(url).stem if url.endswith(".tar") else Path(url).name
         model_dir = default_model_dir
         model_dir = os.path.join(model_dir, file_name)
     return model_dir, url
