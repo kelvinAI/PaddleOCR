@@ -48,12 +48,12 @@ if os.environ.get("PADDLEOCR_HOME"):
 
 
 DEFAULT_OCR_MODEL_VERSION = 'PP-OCRv3'
-SUPPORT_OCR_MODEL_VERSION = ['PP-OCR', 'PP-OCRv2', 'PP-OCRv3','PP-OCRv3-ktp']
+SUPPORT_OCR_MODEL_VERSION = ['PP-OCR', 'PP-OCRv2', 'PP-OCRv3','PP-OCRv3-local']
 DEFAULT_STRUCTURE_MODEL_VERSION = 'PP-STRUCTURE'
 SUPPORT_STRUCTURE_MODEL_VERSION = ['PP-STRUCTURE']
 MODEL_URLS = {
     'OCR': {
-        'PP-OCRv3-ktp': {
+        'PP-OCRv3-local': {
             'det': {
                 'en': {
                     'url':
@@ -63,7 +63,7 @@ MODEL_URLS = {
             'rec': {
                 'en': {
                     'url':
-                    '/home/users/industry/aderaglobal/kelvink/scratch/projects/2022/ocr/pp_ocr/fine_tuning/local_5.3.0/infer_model/infer_ktp_5.3.0',
+                    '~/path_to_model/local_model/path',
                     'dict_path': './ppocr/utils/en_dict.txt'
                 }
             },
