@@ -188,8 +188,6 @@ class TextDetector(object):
         return dt_boxes
 
     def __call__(self, img):
-        from pdb import set_trace
-        
         ori_im = img.copy()
         data = {'image': img}
 
