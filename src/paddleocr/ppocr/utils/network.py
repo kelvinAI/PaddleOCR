@@ -41,46 +41,55 @@ def download_with_progressbar(url, save_path):
         logger.error("Something went wrong while downloading models")
         sys.exit(0)
 
+from pdb import set_trace
 def maybe_download(model_storage_directory, url, force_redownload=False):
     # using custom model
-    tar_file_name_list = [
+    model_file_names = {
         'inference.pdiparams', 'inference.pdiparams.info', 'inference.pdmodel'
-    ]
-    if force_redownload or not os.path.exists(
-            os.path.join(model_storage_directory, 'inference.pdiparams')
-    ) or not os.path.exists(
-            os.path.join(model_storage_directory, 'inference.pdmodel')):
-        # assert url.endswith('.tar'), 'Only supports tar compressed package'
-        os.makedirs(model_storage_directory, exist_ok=True)
-        if url.endswith('.tar'):
-            tmp_path = os.path.join(model_storage_directory, url.split('/')[-1])
-            print('download {} to {}'.format(url, tmp_path))
-            download_with_progressbar(url, tmp_path)
-            with tarfile.open(tmp_path, 'r') as tarObj:
-                for member in tarObj.getmembers():
-                    filename = None
-                    for tar_file_name in tar_file_name_list:
-                        if tar_file_name in member.name:
-                            filename = tar_file_name
-                    if filename is None:
-                        continue
-                    file = tarObj.extractfile(member)
-                    with open(
-                            os.path.join(model_storage_directory, filename),
-                            'wb') as f:
-                        f.write(file.read())
-            os.remove(tmp_path)
+    }
+    
+    # If all files exist and force_redownload is False, return without doing anything
+    if os.path.exists( os.path.join(model_storage_directory, 'inference.pdiparams')) and os.path.exists(
+            os.path.join(model_storage_directory, 'inference.pdmodel')) and not force_redownload:
+        return
+    
+    # Make the directory to store the models
+    os.makedirs(model_storage_directory, exist_ok=True)
+    # If the url is a web url and ends with .tar, download
+    if url.endswith('.tar'):
+        if url.startswith("http"):
+            tmp_tarfile_path = os.path.join(model_storage_directory, url.split('/')[-1])
+            download_with_progressbar(url, tmp_tarfile_path)
+            print('Downloading {} to {}'.format(url, tmp_tarfile_path))
         else:
-            # Assume that url is a path on server
-            # Copy 'inference.pdiparams' and 'inference.pdmodel' to model_storage_directory
-            for tar_file_name in tar_file_name_list:
-                file = os.path.join(url,tar_file_name)
-                if not os.path.isfile(file):
-                    print("{} does not exist".format(tar_file_name))
-                    continue
-                print("copying {} to {}".format(file,model_storage_directory))
+            tmp_tarfile_path = url
+        # Extract file to temporary folder
+        extract_tar(model_storage_directory, model_file_names, tmp_tarfile_path)
+    # if url is a path
+    elif os.path.isdir(url):
+        for tar_file_name in model_file_names:
+            file = os.path.join(url,tar_file_name)
+            if os.path.isfile(file):
+                # print("copying {} to {}".format(file,model_storage_directory))
                 shutil.copy(file, model_storage_directory)
+                print(f"{file} Reloaded.")
+    elif not os.path.exists(url):
+        raise Exception(f"Library path not found: {url}")
+    else:
+        raise Exception(f"Unknown library path provided: {url}")
 
+def extract_tar(model_storage_directory, model_file_names : set , tmp_tarfile_path):
+    
+    with tarfile.open(tmp_tarfile_path, 'r') as tarObj:
+        for member in tarObj.getmembers():
+            if os.path.basename(member.name) in model_file_names:
+                # This is a required file, extract it
+                # dest_filepath = os.path.join(model_storage_directory, member.name)
+                # Change the member.name to it's basename, there will no longer be nested directory in output.
+                # Be careful of duplicated names!
+                member.name = os.path.basename(member.name)
+                tarObj.extract(member, model_storage_directory)
+                print(f"{member.name} Reloaded.")
 
 def is_link(s):
     return s is not None and s.startswith('http')

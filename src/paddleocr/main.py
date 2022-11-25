@@ -41,10 +41,10 @@ VERSION = '2.5.0.3'
 SUPPORT_REC_MODEL = ['CRNN', 'SVTR_LCNet']
 
 
-BASE_DIR = os.path.expanduser("~/.paddleocr/")
+BASE_DIR = os.path.expanduser("~/.adocr/")
 # Check if PADDLEOCR_HOME environment variable is set
-if os.environ.get("PADDLEOCR_HOME"):
-    BASE_DIR=os.environ.get("PADDLEOCR_HOME")
+if os.environ.get("AD_OCR_HOME"):
+    BASE_DIR=os.environ.get("AD_OCR_HOME")
 
 
 DEFAULT_OCR_MODEL_VERSION = 'PP-OCRv3'
@@ -439,7 +439,7 @@ class PaddleOCR(predict_system.TextSystem):
         params.use_gpu = check_gpu(params.use_gpu)
         ()
         if not params.show_log:
-            logger.setLevel(logging.INFO)
+            logger.setLevel(logging.ERROR)
         self.use_angle_cls = params.use_angle_cls
         lang, det_lang = parse_lang(params.lang)
 
@@ -499,9 +499,10 @@ class PaddleOCR(predict_system.TextSystem):
             logger.error('When input a list of images, det must be false')
             exit(0)
         if cls == True and self.use_angle_cls == False:
-            logger.warning(
-                'Since the angle classifier is not initialized, the angle classifier will not be uesd during the forward process'
-            )
+            # logger.warning(
+            #     'Since the angle classifier is not initialized, the angle classifier will not be uesd during the forward process'
+            # )
+            pass
         if isinstance(img, str):
             # download net image
             if img.startswith('http'):
@@ -547,7 +548,7 @@ class PPStructure(StructureSystem):
         params.use_gpu = check_gpu(params.use_gpu)
 
         if not params.show_log:
-            logger.setLevel(logging.INFO)
+            logger.setLevel(logging.ERROR)
         lang, det_lang = parse_lang(params.lang)
 
         # init model dir
